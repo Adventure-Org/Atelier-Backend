@@ -16,5 +16,10 @@
   "bugs": {
     "url": "https://github.com/Adventure-Time-Org/Atelier-Backend/issues"
   },
-  "homepage": "https://github.com/Adventure-Time-Org/Atelier-Backend#readme"
+  "homepage": "https://github.com/Adventure-Time-Org/Atelier-Backend#readme",
+  "dependencies": {
+    "eslint-config-airbnb": "^19.0.4",
+    "fast-csv": "^4.3.6",
+    "pg": "^8.7.3"
+  }
 }

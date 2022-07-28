@@ -12,49 +12,49 @@ CREATE TABLE products (
   default_price INT NOT NULL
   );
 
-DROP TABLE IF EXISTS styles;
+DROP TABLE IF EXISTS styles CASCADE;
 CREATE TABLE styles (
   id INT NOT NULL PRIMARY KEY,
   productId INT NOT NULL,
   name VARCHAR(500) NOT NULL,
   sale_price VARCHAR(20),
-  original_price VARCHAR(20) NOT NULL,
+  original_price VARCHAR(20) DEFAULT NULL,
   default_style BOOLEAN NOT NULL,
-  main_id INT REFERENCES products(id)
+  FOREIGN KEY (productId) REFERENCES products(id)
 );
 
-DROP TABLE IF EXISTS photos;
+DROP TABLE IF EXISTS photos CASCADE;
 CREATE TABLE photos (
 id INT NOT NULL PRIMARY KEY,
 styleId INT NOT NULL,
 url TEXT,
 thumbnail_url TEXT,
-main_id INT REFERENCES products(id)
+FOREIGN KEY (styleId) REFERENCES styles(id)
 );
 
-DROP TABLE IF EXISTS skus;
+DROP TABLE IF EXISTS skus CASCADE;
 CREATE TABLE skus (
   sku_id INT NOT NULL PRIMARY KEY,
   styleID INT NOT NULL,
   size VARCHAR(255) NOT NULL,
-  quantity INT NOT NULL,
-  main_id INT REFERENCES products(id)
+  quantity INT DEFAULT NULL,
+  FOREIGN KEY (styleID) REFERENCES styles(id)
 );
 
-DROP TABLE IF EXISTS related;
+DROP TABLE IF EXISTS related CASCADE;
 CREATE TABLE related (
   id INT NOT NULL PRIMARY KEY,
   current_product_id INT NOT NULL,
   related_product_id INT NOT NULL,
-  main_id INT REFERENCES products(id)
+  FOREIGN KEY (current_product_id) REFERENCES products(id)
 );
 
-DROP TABLE IF EXISTS features;
+DROP TABLE IF EXISTS features CASCADE;
 CREATE TABLE features (
   id INT NOT NULL PRIMARY KEY,
-  product_id INT,
+  product_id INT NOT NULL,
   feature VARCHAR(1000) NOT NULL,
   value VARCHAR(1000) NOT NULL,
-  main_id INT REFERENCES products(id)
+  FOREIGN KEY (product_id) REFERENCES products(id)
 );
 -- psql -U postgres < /Users/hunny/Atelier-Backend/db/productSchema.sql

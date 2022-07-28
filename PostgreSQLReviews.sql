@@ -8,7 +8,7 @@ CREATE TABLE reviews (
   review_id INT PRIMARY KEY NOT NULL,
   product_id INT NOT NULL,
   rating INT NOT NULL,
-  date VARCHAR(25),
+  date BIGINT NOT NULL,
   summary VARCHAR(1000),
   body VARCHAR(1000),
   recommended boolean,
@@ -45,6 +45,8 @@ CREATE TABLE characteristics_reviews (
   FOREIGN KEY (review_id) REFERENCES reviews(review_id),
   FOREIGN KEY (characteristic_id) REFERENCES characteristics(characteristics_id)
 );
+
+-- SELECT date FROM reviews;
 
 -- USE reviewsDB;
 

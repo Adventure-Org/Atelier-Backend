@@ -8,7 +8,7 @@ CREATE TABLE questions (
   product_id INT NOT NULL,
   id INT PRIMARY KEY NOT NULL,
   body VARCHAR(1000),
-  date_written VARCHAR(50) NOT NULL,
+  date_written BIGINT NOT NULL,
   asker_name VARCHAR(255) NOT NULL,
   asker_email VARCHAR(255) NOT NULL,
   helpful INT NOT NULL,
@@ -19,7 +19,7 @@ DROP TABLE IF EXISTS answers CASCADE;
 CREATE TABLE answers (
   id INT PRIMARY KEY NOT NULL,
   body VARCHAR(1000) NOT NULL,
-  date_written VARCHAR(50) NOT NULL,
+  date_written BIGINT NOT NULL,
   answerer_name VARCHAR(255) NOT NULL,
   answerer_email VARCHAR(255) NOT NULL,
   helpful INT NOT NULL,
@@ -44,3 +44,11 @@ CREATE TABLE answer_photos (
 \COPY answers(id, question_id, body, date_written, answerer_name, answerer_email, reported, helpful) FROM '/Users/roycechun/Desktop/RFP2205/Atelier-Backend/data/answers.csv' CSV HEADER;
 
 \COPY answer_photos(id, answer_id, url) FROM '/Users/roycechun/Desktop/RFP2205/Atelier-Backend/data/answers_photos.csv' CSV HEADER;
+
+ALTER TABLE questions
+ALTER COLUMN date_written TYPE timestamp
+USING to_timestamp(date_written / 1000::numeric);
+
+ALTER TABLE answers
+ALTER COLUMN date_written TYPE timestamp
+USING to_timestamp(date_written / 1000::numeric);

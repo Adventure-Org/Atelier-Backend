@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "nodemon server/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -16,5 +17,11 @@
   "bugs": {
     "url": "https://github.com/Adventure-Time-Org/Atelier-Backend/issues"
   },
-  "homepage": "https://github.com/Adventure-Time-Org/Atelier-Backend#readme"
+  "homepage": "https://github.com/Adventure-Time-Org/Atelier-Backend#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.1",
+    "fast-csv": "^4.3.6",
+    "pg": "^8.7.3"
+  }
 }

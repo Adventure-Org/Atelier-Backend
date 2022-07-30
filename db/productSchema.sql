@@ -20,7 +20,8 @@ CREATE TABLE styles (
   sale_price VARCHAR(20),
   original_price VARCHAR(20) DEFAULT NULL,
   default_style BOOLEAN NOT NULL,
-  FOREIGN KEY (productId) REFERENCES products(id)
+  FOREIGN KEY (productId) REFERENCES products(id),
+  CREATE INDEX IX_productId ON styles(productId)
 );
 
 DROP TABLE IF EXISTS photos CASCADE;
@@ -29,7 +30,8 @@ id INT NOT NULL PRIMARY KEY,
 styleId INT NOT NULL,
 url TEXT,
 thumbnail_url TEXT,
-FOREIGN KEY (styleId) REFERENCES styles(id)
+FOREIGN KEY (styleId) REFERENCES styles(id),
+CREATE INDEX IX_styleId ON photos(styleId)
 );
 
 DROP TABLE IF EXISTS skus CASCADE;
@@ -38,7 +40,8 @@ CREATE TABLE skus (
   styleID INT NOT NULL,
   size VARCHAR(255) NOT NULL,
   quantity INT DEFAULT NULL,
-  FOREIGN KEY (styleID) REFERENCES styles(id)
+  FOREIGN KEY (styleID) REFERENCES styles(id),
+  CREATE INDEX IX_styleIDs ON skus(styleID)
 );
 
 DROP TABLE IF EXISTS related CASCADE;
@@ -46,7 +49,8 @@ CREATE TABLE related (
   id INT NOT NULL PRIMARY KEY,
   current_product_id INT NOT NULL,
   related_product_id INT NOT NULL,
-  FOREIGN KEY (current_product_id) REFERENCES products(id)
+  FOREIGN KEY (current_product_id) REFERENCES products(id),
+  CREATE INDEX IX_current_product_id ON related(current_product_id)
 );
 
 DROP TABLE IF EXISTS features CASCADE;
@@ -55,6 +59,7 @@ CREATE TABLE features (
   product_id INT NOT NULL,
   feature VARCHAR(1000) NOT NULL,
   value VARCHAR(1000) NOT NULL,
-  FOREIGN KEY (product_id) REFERENCES products(id)
+  FOREIGN KEY (product_id) REFERENCES products(id),
+  CREATE INDEX IX_product_id ON features(product_id)
 );
 -- psql -U postgres < /Users/hunny/Atelier-Backend/db/productSchema.sql

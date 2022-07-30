@@ -16,12 +16,12 @@ const pool = new Pool({
   port: 5432
 });
 
-// obtains default 3 if no count provided. Count currently not working
+// obtains default 3 if no count provided. Page not yet implemented
 const getProducts = (req, res) => {
-  const { count } = req.query;
+  const { count, page } = req.query;
   const query = 'SELECT * FROM products LIMIT $1';
   const limit = count || 3;
-  console.log(limit)
+  const pagenum = page || 1;
   pool
     .query(query, [limit])
     .then((results) => res.status(200).send(results.rows))
@@ -31,22 +31,27 @@ const getProducts = (req, res) => {
 // optimization - figure out way to not duplicate table info and create features array from query
 const getProduct = (req, res) => {
   const { product_id } = req.params;
-  const query = 'SELECT * FROM products LEFT OUTER JOIN features ON products.id = $1 WHERE features.product_id = $1';
+  const query = 'SELECT p.*, json_agg(f) AS features\
+                  FROM products p\
+                  LEFT OUTER JOIN features f ON p.id = f.product_id\
+                  WHERE p.id = $1\
+                  GROUP BY p.id';
   let container;
   const features = [];
   pool
     .query(query, [product_id])
     .then((results) => {
-      results.rows.forEach((feature) => features.push(
+      const data = results.rows[0]
+      data.features.forEach((feature) => features.push(
         { feature: feature.feature, value: feature.value }
       ));
       container = {
-        id: results.rows[0].id,
-        name: results.rows[0].name,
-        slogan: results.rows[0].slogan,
-        description: results.rows[0].description,
-        category: results.rows[0].category,
-        default_price: `${results.rows[0].default_price}.00`,
+        id: data.id,
+        name: data.name,
+        slogan: data.slogan,
+        description: data.description,
+        category: data.category,
+        default_price: `${data.default_price}.00`,
         features: features
       };
     })
@@ -54,33 +59,38 @@ const getProduct = (req, res) => {
     .catch((err) => { res.status(500).send(err); console.log(err) })
 };
 
-// add photos and sku with a join - issue joining 3 tables
+// 3 tables creating duplicate info
 const getStyles = (req, res) => {
   const { product_id } = req.params;
-  const query = 'SELECT * FROM styles\
-                  LEFT OUTER JOIN photos ON styles.id = photos.styleId\
-                  LEFT OUTER JOIN skus ON styles.id = skus.styleID\
-                  WHERE styles.id = $1';
+  const query = 'SELECT s.*, json_agg(p) AS photos, json_agg(sk) AS skus\
+                FROM styles s\
+                LEFT OUTER JOIN photos p ON s.id = p.styleId\
+                LEFT OUTER JOIN skus sk ON s.id = sk.styleID\
+                WHERE s.id = $1\
+                GROUP BY s.id';
   let container;
   const photos = [];
   const sku = [];
   pool
     .query(query, [product_id])
     .then((results) => {
-      results.rows.forEach((row) => {
+      const data = results.rows[0];
+      data.photos.forEach((photo) => {
         photos.push(
-          { thumbnail_url: row.thumbnail_url, url: row.url }
+          { thumbnail_url: photo.thumbnail_url, url: photo.url }
         );
-        sku.push({ [row.sku_id]: { quantity: row.quantity, size: row.size } });
+      })
+      data.skus.forEach((thisSku) => {
+        sku.push({ [thisSku.sku_id]: { quantity: thisSku.quantity, size: thisSku.size } });
       });
       container = {
-        style_id: results.rows[0].id,
-        name: results.rows[0].name,
-        original_price: results.rows[0].original_price,
-        sale_price: results.rows[0].sale_price,
-        'default?': results.rows[0].default_style,
+        style_id: data.id,
+        name: data.name,
+        original_price: data.original_price,
+        sale_price: data.sale_price,
+        'default?': data.default_style,
         photos: photos,
-        sku: sku
+        skus: sku
       };
     })
 

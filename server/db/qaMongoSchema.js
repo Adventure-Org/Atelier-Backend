@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-
 let repoSchema = mongoose.Schema({
   product_id: {type: Number, unique: true},
   question_id: {type: Number, unique: true},

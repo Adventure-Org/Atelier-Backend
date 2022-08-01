@@ -35,27 +35,9 @@ const getProduct = (req, res) => {
                   FROM products p\
                   WHERE p.id = $1\
                   GROUP BY p.id";
-  let container;
-  // const features = [];
   pool
     .query(query, [product_id])
-    .then((results) => {
-      const data = results.rows[0]
-      // data.features.forEach((feature) => features.push(
-      //   { feature: feature.feature, value: feature.value }
-      // ));
-      container = {
-        id: data.id,
-        name: data.name,
-        slogan: data.slogan,
-        description: data.description,
-        category: data.category,
-        default_price: `${data.default_price}.00`,
-        features: data.features
-      };
-      console.log(results.rows[0].features);
-    })
-    .then(() => res.status(200).send(container))
+    .then((results) => res.status(200).send(results.rows[0]))
     .catch((err) => { res.status(500).send(err); console.log(err) })
 };
 
@@ -69,7 +51,7 @@ const getStyles = (req, res) => {
                 FROM styles s\
                 WHERE s.id = $1\
                 GROUP BY s.id";
-  let container;
+  // let container;
   // const photos = [];
   // const sku = [];
   pool
@@ -84,18 +66,20 @@ const getStyles = (req, res) => {
       // data.skus.forEach((thisSku) => {
       //   sku.push({ [thisSku.sku_id]: { quantity: thisSku.quantity, size: thisSku.size } });
       // });
-      container = {
-        style_id: data.id,
-        name: data.name,
-        original_price: data.original_price,
-        sale_price: data.sale_price,
-        'default?': data.default_style,
-        photos: data.photos,
-        skus: data.skus
-      };
+      // console.log(data)
+      // container = {
+      //   style_id: data.id,
+      //   name: data.name,
+      //   original_price: data.original_price,
+      //   sale_price: data.sale_price,
+      //   'default?': data.default_style,
+      //   photos: data.photos,
+      //   skus: data.skus
+      // };
+      res.status(200).send(data)
     })
 
-    .then(() => res.status(200).send(container))
+    // .then(() => res.status(200).send(container))
     .catch((err) => { res.status(500).send(err); console.log(err) })
 }
 

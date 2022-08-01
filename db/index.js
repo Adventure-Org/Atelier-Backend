@@ -44,42 +44,23 @@ const getProduct = (req, res) => {
 const getStyles = (req, res) => {
   const { product_id } = req.params;
   const query = "SELECT s.*,\
-                (SELECT json_agg(json_build_object('url', p.url, 'thumbnail_url', p.thumbnail_url))\
-                AS photos FROM photos p WHERE p.styleid = s.id),\
+                (SELECT json_agg(json_build_object('url', ph.url, 'thumbnail_url', ph.thumbnail_url))\
+                AS photos FROM photos ph WHERE ph.styleid = s.id),\
                 (SELECT json_agg(json_build_object('size', sk.size, 'quantity', sk.quantity))\
                 AS skus FROM skus sk WHERE sk.styleID = s.id)\
                 FROM styles s\
-                WHERE s.id = $1\
-                GROUP BY s.id";
-  // let container;
-  // const photos = [];
-  // const sku = [];
+                WHERE s.productId = $1\
+                GROUP BY s.id, s.productId";
   pool
     .query(query, [product_id])
     .then((results) => {
-      const data = results.rows[0];
-      // data.photos.forEach((photo) => {
-      //   photos.push(
-      //     { thumbnail_url: photo.thumbnail_url, url: photo.url }
-      //   );
-      // })
-      // data.skus.forEach((thisSku) => {
-      //   sku.push({ [thisSku.sku_id]: { quantity: thisSku.quantity, size: thisSku.size } });
-      // });
-      // console.log(data)
-      // container = {
-      //   style_id: data.id,
-      //   name: data.name,
-      //   original_price: data.original_price,
-      //   sale_price: data.sale_price,
-      //   'default?': data.default_style,
-      //   photos: data.photos,
-      //   skus: data.skus
-      // };
-      res.status(200).send(data)
+      const container = {
+        product_id: product_id,
+        results: results.rows
+      };
+      console.log(results);
+      res.status(200).send(container)
     })
-
-    // .then(() => res.status(200).send(container))
     .catch((err) => { res.status(500).send(err); console.log(err) })
 }
 

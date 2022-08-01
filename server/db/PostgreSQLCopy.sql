@@ -10,6 +10,8 @@ ALTER TABLE reviews
 ALTER COLUMN date TYPE timestamp
 USING to_timestamp(date / 1000::numeric);
 
+SELECT setval(pg_get_serial_sequence('reviews', 'review_id'), (SELECT max(review_id) FROM reviews));
+
 -- UPDATE reviews SET date = to_timestamp(date);
 
 -- ALTER TABLE questions

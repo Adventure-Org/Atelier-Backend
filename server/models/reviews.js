@@ -28,7 +28,7 @@ exports.getReviews = (req, res) => {
   // pool.query('SELECT * FROM reviews r LEFT JOIN reviews_photos p ON r.review_id = p.review_id WHERE r.product_id = 5')
   pool.query(queryString)
     .then((result) => {
-      // console.log('Result from Reviews: ', result.rows);
+      console.log('Result from Reviews: ', result.rows);
       let records = result.rows;
       for (let i = 0; i < records.length; i += 1) {
         let container = {
@@ -50,6 +50,7 @@ exports.getReviews = (req, res) => {
     })
     .catch((err) => {
       console.log('Error in getReviews:', err);
+      res.status(400).send(err);
     })
 };
 
@@ -70,9 +71,6 @@ exports.getMetadata = (req, res) => {
     },
     characteristics: {},
   };
-  // const queryString = 'SELECT r.rating, r.recommended FROM reviews r INNER JOIN characteristics_reviews cr on r.review_id = cr.review_id INNER JOIN characteristics c on cr.characteristic_id = c.characteristics_id WHERE r.product_id = '+product_id;
-  //'SELECT r.rating, r.recommended FROM reviews r INNER JOIN characteristics_reviews cr on r.review_id = cr.review_id INNER JOIN characteristics c on cr.characteristic_id = c.characteristics_id WHERE r.product_id = '+product_id;
-  // const queryString = '(SELECT json_agg(cr.characteristics_reviews_id) FROM characteristics_reviews cr INNER JOIN characteristics c INNER JOIN ON cr.characteristic_id = c.characteristics_id) AS id'
 
   //Below are good to go
   // const queryString = 'SELECT json_agg(c.name) as characteristics FROM characteristics c WHERE c.product_id = '+product_id;
@@ -123,5 +121,20 @@ exports.getMetadata = (req, res) => {
     })
     .catch((err) => {
       console.log('Error in getMetadata:', err);
+      res.status(400).send(err);
     })
+};
+
+exports.addReview = (req, res) => {
+  const record = req.body;
+  const queryString = "INSERT INTO reviews VALUES ((SELECT nextval(pg_get_serial_sequence('reviews', 'review_id'))), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)"
+  pool.query(queryString, [record.product_id, record.rating, new Date(Date.now()), record.summary, record.body, record.recommend, false, record.name, record.email, null, 0])
+    .then((result) => {
+      res.status(201).send(result);
+    })
+    .catch((err) => {
+      console.log('Error in addReview: ', err);
+      res.status(400).send(err);
+    })
+  // console.log(req.body);
 }

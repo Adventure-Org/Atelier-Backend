@@ -5,7 +5,7 @@ CREATE DATABASE reviewsdb;
 
 DROP TABLE IF EXISTS reviews CASCADE;
 CREATE TABLE reviews (
-  review_id INT PRIMARY KEY NOT NULL,
+  review_id SERIAL PRIMARY KEY NOT NULL,
   product_id INT NOT NULL,
   rating INT NOT NULL,
   date BIGINT NOT NULL,

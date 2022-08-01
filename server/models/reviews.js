@@ -24,12 +24,12 @@ exports.getReviews = (req, res) => {
   };
   // const queryString = 'SELECT reviews.*, (SELECT json_agg(reviews_photos.*) FROM reviews_photos WHERE reviews.review_id = reviews_photos.review_id) AS photos FROM reviews WHERE reviews.product_id = ' + product_id;
 
-  const queryString = `SELECT r.review_id, r. rating, r.summary, r.recommended, r.response, r.body, r.date, r.reviewer_name, r.helpfulness, (SELECT COALESCE(json_agg(reviews_photos.*), '[]') FROM reviews_photos WHERE r.review_id = reviews_photos.review_id) AS photos FROM reviews r WHERE r.product_id = ` + product_id;
+  const queryString = `SELECT r.review_id, r. rating, r.summary, r.recommended, r.response, r.body, r.date, r.reviewer_name, r.helpfulness, (SELECT COALESCE(json_agg(reviews_photos.*), '[]') FROM reviews_photos WHERE r.review_id = reviews_photos.review_id) AS photos FROM reviews r WHERE r.reported = false AND r.product_id = ` + product_id;
   pool.query(queryString)
     .then((result) => {
       // console.log('Final Object:', resultObj);
       resultObj.results = result.rows;
-      res.status(201).send(resultObj);
+      res.status(200).send(resultObj);
     })
     .catch((err) => {
       console.log('Error in getReviews:', err);
@@ -100,7 +100,7 @@ exports.getMetadata = (req, res) => {
         resultObj.characteristics[key].value /= totalCount;
       }
       // console.log('Second result obj:', resultObj);
-      res.status(201).send(resultObj);
+      res.status(200).send(resultObj);
     })
     .catch((err) => {
       console.log('Error in getMetadata:', err);
@@ -124,7 +124,7 @@ exports.addReview = (req, res) => {
 
 exports.markHelpful = (req, res) => {
   const review_id = req.params.review_id;
-  console.log(req.params.review_id);
+  // console.log(req.params.review_id);
   const queryString = "UPDATE reviews SET helpfulness = helpfulness + 1 WHERE reviews.review_id = " + review_id;
   pool.query(queryString)
     .then(() => {
@@ -132,6 +132,19 @@ exports.markHelpful = (req, res) => {
     })
     .catch((err) => {
       console.log('Error in markHelpful: ', err);
+      res.status(400).send(err);
+    })
+}
+
+exports.reportReview = (req, res) => {
+  const review_id = req.params.review_id;
+  const queryString = "UPDATE reviews SET reported = TRUE WHERE reviews.review_id = " + review_id;
+  pool.query(queryString)
+    .then(() => {
+      res.sendStatus(204);
+    })
+    .catch((err) => {
+      console.log('Error in reportReview: ', err);
       res.status(400).send(err);
     })
 }

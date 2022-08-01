@@ -22,30 +22,13 @@ exports.getReviews = (req, res) => {
     count: count,
     results: [],
   };
-  const queryString = 'SELECT reviews.*, (SELECT json_agg(reviews_photos.*) FROM reviews_photos WHERE reviews.review_id = reviews_photos.review_id) AS photos FROM reviews WHERE reviews.product_id = ' + product_id;
-  // pool.query('SELECT reviews.*, (SELECT json_agg(reviews_photos.*) FROM reviews_photos WHERE reviews.review_id = reviews_photos.review_id) as photos FROM reviews WHERE reviews.product_id = 1')
-  // pool.query('SELECT * FROM reviews LEFT JOIN reviews_photos ON reviews.review_id = reviews_photos.review_id WHERE reviews.product_id = 5')
-  // pool.query('SELECT * FROM reviews r LEFT JOIN reviews_photos p ON r.review_id = p.review_id WHERE r.product_id = 5')
+  // const queryString = 'SELECT reviews.*, (SELECT json_agg(reviews_photos.*) FROM reviews_photos WHERE reviews.review_id = reviews_photos.review_id) AS photos FROM reviews WHERE reviews.product_id = ' + product_id;
+
+  const queryString = `SELECT r.review_id, r. rating, r.summary, r.recommended, r.response, r.body, r.date, r.reviewer_name, r.helpfulness, (SELECT COALESCE(json_agg(reviews_photos.*), '[]') FROM reviews_photos WHERE r.review_id = reviews_photos.review_id) AS photos FROM reviews r WHERE r.product_id = ` + product_id;
   pool.query(queryString)
     .then((result) => {
-      console.log('Result from Reviews: ', result.rows);
-      let records = result.rows;
-      for (let i = 0; i < records.length; i += 1) {
-        let container = {
-          review_id: records[i].review_id,
-          rating: records[i].rating,
-          summary: records[i].summary,
-          recommend: records[i].recommended,
-          response: records[i].response,
-          body: records[i].body,
-          date: records[i].date,
-          review_name: records[i].reviewer_name,
-          helpfulness: records[i].helpfulness,
-          photos: records[i].photos,
-        };
-        resultObj.results.push(container);
-      }
       // console.log('Final Object:', resultObj);
+      resultObj.results = result.rows;
       res.status(201).send(resultObj);
     })
     .catch((err) => {

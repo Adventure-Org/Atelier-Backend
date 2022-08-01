@@ -11,7 +11,7 @@ CREATE TABLE reviews (
   date BIGINT NOT NULL,
   summary VARCHAR(1000),
   body VARCHAR(1000),
-  recommended boolean,
+  recommend boolean,
   reported boolean,
   reviewer_name VARCHAR(50),
   reviewer_email VARCHAR(50),

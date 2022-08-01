@@ -121,3 +121,17 @@ exports.addReview = (req, res) => {
     })
   // console.log(req.body);
 }
+
+exports.markHelpful = (req, res) => {
+  const review_id = req.params.review_id;
+  console.log(req.params.review_id);
+  const queryString = "UPDATE reviews SET helpfulness = helpfulness + 1 WHERE reviews.review_id = " + review_id;
+  pool.query(queryString)
+    .then(() => {
+      res.sendStatus(204);
+    })
+    .catch((err) => {
+      console.log('Error in markHelpful: ', err);
+      res.status(400).send(err);
+    })
+}

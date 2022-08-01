@@ -8,6 +8,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use('/', router);
+app.use((req, res) => {console.log(req.method, req.url)});
 
 // const {pool} = pg
 const port = process.env.PORT || 3001;

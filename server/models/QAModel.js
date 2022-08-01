@@ -14,6 +14,7 @@ exports.getQuestions = (req, res) => {
   let offset = 0;
   let responseObj = {};
 
+  console.log(' here is questions: ', product_id);
   if (page === undefined) {
     page = 1;
   }

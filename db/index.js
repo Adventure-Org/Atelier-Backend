@@ -28,23 +28,22 @@ const getProducts = (req, res) => {
     .catch((err) => { res.status(500); console.log(err) })
 }
 
-// optimization - figure out way to not duplicate table info and create features array from query
 const getProduct = (req, res) => {
   const { product_id } = req.params;
-  const query = 'SELECT p.*, json_agg(f) AS features\
+  const query = "SELECT p.*, (SELECT json_agg(json_build_object('feature', f.feature, 'value', f.value))\
+                  AS features FROM features f WHERE f.product_id = p.id)\
                   FROM products p\
-                  LEFT OUTER JOIN features f ON p.id = f.product_id\
                   WHERE p.id = $1\
-                  GROUP BY p.id';
+                  GROUP BY p.id";
   let container;
-  const features = [];
+  // const features = [];
   pool
     .query(query, [product_id])
     .then((results) => {
       const data = results.rows[0]
-      data.features.forEach((feature) => features.push(
-        { feature: feature.feature, value: feature.value }
-      ));
+      // data.features.forEach((feature) => features.push(
+      //   { feature: feature.feature, value: feature.value }
+      // ));
       container = {
         id: data.id,
         name: data.name,
@@ -52,45 +51,47 @@ const getProduct = (req, res) => {
         description: data.description,
         category: data.category,
         default_price: `${data.default_price}.00`,
-        features: features
+        features: data.features
       };
+      console.log(results.rows[0].features);
     })
     .then(() => res.status(200).send(container))
     .catch((err) => { res.status(500).send(err); console.log(err) })
 };
 
-// 3 tables creating duplicate info
 const getStyles = (req, res) => {
   const { product_id } = req.params;
-  const query = 'SELECT s.*, json_agg(p) AS photos, json_agg(sk) AS skus\
+  const query = "SELECT s.*,\
+                (SELECT json_agg(json_build_object('url', p.url, 'thumbnail_url', p.thumbnail_url))\
+                AS photos FROM photos p WHERE p.styleid = s.id),\
+                (SELECT json_agg(json_build_object('size', sk.size, 'quantity', sk.quantity))\
+                AS skus FROM skus sk WHERE sk.styleID = s.id)\
                 FROM styles s\
-                LEFT OUTER JOIN photos p ON s.id = p.styleId\
-                LEFT OUTER JOIN skus sk ON s.id = sk.styleID\
                 WHERE s.id = $1\
-                GROUP BY s.id';
+                GROUP BY s.id";
   let container;
-  const photos = [];
-  const sku = [];
+  // const photos = [];
+  // const sku = [];
   pool
     .query(query, [product_id])
     .then((results) => {
       const data = results.rows[0];
-      data.photos.forEach((photo) => {
-        photos.push(
-          { thumbnail_url: photo.thumbnail_url, url: photo.url }
-        );
-      })
-      data.skus.forEach((thisSku) => {
-        sku.push({ [thisSku.sku_id]: { quantity: thisSku.quantity, size: thisSku.size } });
-      });
+      // data.photos.forEach((photo) => {
+      //   photos.push(
+      //     { thumbnail_url: photo.thumbnail_url, url: photo.url }
+      //   );
+      // })
+      // data.skus.forEach((thisSku) => {
+      //   sku.push({ [thisSku.sku_id]: { quantity: thisSku.quantity, size: thisSku.size } });
+      // });
       container = {
         style_id: data.id,
         name: data.name,
         original_price: data.original_price,
         sale_price: data.sale_price,
         'default?': data.default_style,
-        photos: photos,
-        skus: sku
+        photos: data.photos,
+        skus: data.skus
       };
     })
 

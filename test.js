@@ -4,7 +4,7 @@ import http from 'k6/http';
 export const options = {
   insecureSkipTLSVerify: true,
   noConnectionReuse: false,
-  vus: 10,
+  vus: 80,
   duration: '30s',
 };
 

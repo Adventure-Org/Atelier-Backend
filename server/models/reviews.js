@@ -27,7 +27,7 @@ exports.getReviews = (req, res) => {
 
   const queryString = `SELECT
     r.review_id,
-    r. rating,
+    r.rating,
     r.summary,
     r.recommend,
     r.response,
@@ -37,7 +37,7 @@ exports.getReviews = (req, res) => {
     r.helpfulness,
     (SELECT
       COALESCE
-        (json_agg(reviews_photos.*), '[]')
+        (json_agg(json_build_object('id', reviews_photos.photos_id, 'url', reviews_photos.url)), '[]')
         FROM
           reviews_photos
         WHERE

@@ -10,6 +10,11 @@ ALTER TABLE reviews
 ALTER COLUMN date TYPE timestamp
 USING to_timestamp(date / 1000::numeric);
 
+CREATE INDEX idx_review_id ON reviews(product_id);
+CREATE INDEX idx_photos_id ON reviews_photos(review_id);
+CREATE INDEX idx_characteristics_id ON characteristics(product_id);
+CREATE INDEX idx_characteristics_reviews_id ON characteristics_reviews(characteristic_id);
+
 SELECT setval(pg_get_serial_sequence('reviews', 'review_id'), (SELECT max(review_id) FROM reviews));
 
 -- UPDATE reviews SET date = to_timestamp(date);

@@ -8,3 +8,5 @@ coverage
 _tests_
 .DS_Store
 **/package-lock.json
+data/
+.eslintrc.json

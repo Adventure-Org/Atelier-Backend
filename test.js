@@ -7,8 +7,7 @@ export const options = {
   vus: 80,
   duration: '30s',
 };
-
-const url = 'http://localhost:8080/products/';
+const url = 'http://localhost:8080/products';
 
 export default () => {
   http.batch([

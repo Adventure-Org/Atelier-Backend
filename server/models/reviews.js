@@ -1,12 +1,13 @@
 /* eslint-disable max-len */
 const { Pool, Client } = require('pg');
+require('dotenv').config();
 
 const pool = new Pool({
-  user: 'andychow',
-  host: 'localhost',
-  database: 'reviewsdb',
-  password: '',
-  port: 5432,
+  user: process.env.USER,
+  host: process.env.HOST,
+  database: process.env.DATABASE,
+  password: process.env.PASSWORD,
+  port: process.env.DBPORT,
 });
 
 exports.getReviews = (req, res) => {

@@ -58,7 +58,6 @@ const getStyles = (req, res) => {
         product_id: product_id,
         results: results.rows
       };
-      console.log(results);
       res.status(200).send(container)
     })
     .catch((err) => { res.status(500).send(err); console.log(err) })

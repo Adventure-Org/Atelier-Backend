@@ -7,3 +7,6 @@ node_modules
 coverage
 .DS_Store
 **/package-lock.json
+dump.rdb
+newrelic.js
+newrelic_agent.log

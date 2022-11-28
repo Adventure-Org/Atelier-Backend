@@ -1,9 +1,10 @@
 /* eslint-disable max-len */
 const { Pool, Client } = require('pg');
 require('dotenv').config();
+const client = require('../redis');
 
 const pool = new Pool({
-  user: process.env.USER,
+  user: 'ubuntu',
   host: process.env.HOST,
   database: process.env.DATABASE,
   password: process.env.PASSWORD,
@@ -26,39 +27,55 @@ exports.getReviews = (req, res) => {
   };
   // const queryString = 'SELECT reviews.*, (SELECT json_agg(reviews_photos.*) FROM reviews_photos WHERE reviews.review_id = reviews_photos.review_id) AS photos FROM reviews WHERE reviews.product_id = ' + product_id;
 
-  const queryString = `SELECT
-    r.review_id,
-    r.rating,
-    r.summary,
-    r.recommend,
-    r.response,
-    r.body,
-    r.date,
-    r.reviewer_name,
-    r.helpfulness,
-    (SELECT
-      COALESCE
-        (json_agg(json_build_object('id', reviews_photos.photos_id, 'url', reviews_photos.url)), '[]')
-        FROM
-          reviews_photos
-        WHERE
-          r.review_id = reviews_photos.review_id)
-    AS
-      photos
-  FROM
-    reviews r
-  WHERE
-    r.reported = false AND r.product_id = ${product_id}`;
-  pool.query(queryString)
+  // Redis Cache
+  let cacheEntry;
+  client.get(product_id)
     .then((result) => {
-      // console.log('Final Object:', resultObj);
-      resultObj.results = result.rows;
-      res.status(200).send(resultObj);
+      console.log(JSON.parse(result));
+      cacheEntry = result;
     })
     .catch((err) => {
-      console.log('Error in getReviews:', err);
-      res.status(400).send(err);
+      console.log('Error in checking cache: ', err);
     });
+
+  if (cacheEntry) {
+    res.status(200).send(JSON.parse(cacheEntry));
+  } else {
+    const queryString = `SELECT
+      r.review_id,
+      r.rating,
+      r.summary,
+      r.recommend,
+      r.response,
+      r.body,
+      r.date,
+      r.reviewer_name,
+      r.helpfulness,
+      (SELECT
+        COALESCE
+          (json_agg(json_build_object('id', reviews_photos.photos_id, 'url', reviews_photos.url)), '[]')
+          FROM
+            reviews_photos
+          WHERE
+            r.review_id = reviews_photos.review_id)
+      AS
+        photos
+    FROM
+      reviews r
+    WHERE
+      r.reported = false AND r.product_id = ${product_id}`;
+    pool.query(queryString)
+      .then((result) => {
+        // console.log('Final Object:', resultObj);
+        resultObj.results = result.rows;
+        client.set(product_id, JSON.stringify(resultObj));
+        res.status(200).send(resultObj);
+      })
+      .catch((err) => {
+        console.log('Error in getReviews:', err);
+        res.status(400).send(err);
+      });
+  }
 };
 
 exports.getMetadata = (req, res) => {

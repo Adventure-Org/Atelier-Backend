@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const newrelic = require('newrelic');
 const bodyParser = require('body-parser');
 // const db = require('./db/index.js');
 const router = require('./routes');

@@ -4,14 +4,14 @@ require('dotenv').config();
 const client = require('../redis');
 
 const pool = new Pool({
-  user: 'ubuntu',
+  user: process.env.USER,
   host: process.env.HOST,
   database: process.env.DATABASE,
   password: process.env.PASSWORD,
   port: process.env.DBPORT,
 });
 
-exports.getReviews = (req, res) => {
+exports.getReviews = async (req, res) => {
   // console.log('Req:', req);
   // 'SELECT * FROM reviews LIMIT 1'
   // console.log('req.query', req.query);
@@ -28,15 +28,15 @@ exports.getReviews = (req, res) => {
   // const queryString = 'SELECT reviews.*, (SELECT json_agg(reviews_photos.*) FROM reviews_photos WHERE reviews.review_id = reviews_photos.review_id) AS photos FROM reviews WHERE reviews.product_id = ' + product_id;
 
   // Redis Cache
-  let cacheEntry;
-  client.get(product_id)
-    .then((result) => {
-      console.log(JSON.parse(result));
-      cacheEntry = result;
-    })
-    .catch((err) => {
-      console.log('Error in checking cache: ', err);
-    });
+  const cacheEntry = await client.get(product_id);
+  // client.get(product_id)
+  //   .then((result) => {
+  //     console.log(JSON.parse(result));
+  //     cacheEntry = result;
+  //   })
+  //   .catch((err) => {
+  //     console.log('Error in checking cache: ', err);
+  //   });
 
   if (cacheEntry) {
     res.status(200).send(JSON.parse(cacheEntry));
